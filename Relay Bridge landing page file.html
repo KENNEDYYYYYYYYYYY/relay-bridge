@@ -1,0 +1,636 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="description" content="Relay Bridge moves USDC from Base to Arbitrum in one flow — live Relay quote, wallet-signed steps, tracked to success with a saved receipt. Powered by Relay's 58-chain network." />
+    <link rel="icon" href="data:," />
+    <title>Relay Bridge — USDC from Base to Arbitrum, in one flow</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <style>
+      :root {
+        --bg: #fbfcfb;
+        --bg-raised: #ffffff;
+        --bg-sunken: #f1f4f2;
+        --ink: #101613;
+        --ink-2: #3d4741;
+        --ink-3: #68736c;
+        --line: #dde3df;
+        --line-strong: #c6cfc9;
+        --accent: #0b6e4f;
+        --accent-ink: #ffffff;
+        --accent-soft: #e3f0ea;
+        --dark-panel: #0d120f;
+        --dark-panel-2: #151c17;
+        --dark-line: #263029;
+        --dark-ink: #eef3f0;
+        --dark-ink-2: #a9b6ad;
+        --mint: #3ecf8e;
+        --amber: #b97e10;
+        --amber-soft: #f7ecd4;
+        --radius: 10px;
+        --maxw: 1120px;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg: #0b0f0d;
+          --bg-raised: #121713;
+          --bg-sunken: #0e130f;
+          --ink: #edf2ee;
+          --ink-2: #b3beb6;
+          --ink-3: #7e8b82;
+          --line: #232b25;
+          --line-strong: #333e36;
+          --accent: #3ecf8e;
+          --accent-ink: #07130c;
+          --accent-soft: #14281e;
+          --amber: #e0aa3e;
+          --amber-soft: #2b2110;
+        }
+      }
+      * { box-sizing: border-box; }
+      html { scroll-behavior: smooth; }
+      @media (prefers-reduced-motion: reduce) {
+        html { scroll-behavior: auto; }
+        * { transition: none !important; animation: none !important; }
+      }
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--ink);
+        font-family: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+        font-size: 16px;
+        line-height: 1.55;
+        -webkit-font-smoothing: antialiased;
+      }
+      .mono { font-family: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace; }
+      a { color: var(--accent); }
+      :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
+      .wrap { max-width: var(--maxw); margin: 0 auto; padding: 0 24px; }
+
+      /* ---------- Nav ---------- */
+      header.nav {
+        position: sticky; top: 0; z-index: 50;
+        background: color-mix(in srgb, var(--bg) 88%, transparent);
+        backdrop-filter: blur(10px);
+        border-bottom: 1px solid var(--line);
+      }
+      .nav-inner { display: flex; align-items: center; gap: 28px; min-height: 64px; }
+      .brand { display: flex; align-items: center; gap: 10px; text-decoration: none; color: var(--ink); font-weight: 700; font-size: 17px; letter-spacing: -0.01em; }
+      .brand svg { flex: none; }
+      .brand .brand-sub { font-weight: 500; color: var(--ink-3); font-size: 12.5px; letter-spacing: 0; border-left: 1px solid var(--line-strong); padding-left: 10px; margin-left: 2px; }
+      nav.links { display: flex; gap: 4px; margin-left: auto; }
+      nav.links a {
+        color: var(--ink-2); text-decoration: none; font-size: 14.5px; font-weight: 500;
+        padding: 8px 12px; border-radius: 6px; min-height: 36px; display: inline-flex; align-items: center;
+      }
+      nav.links a:hover { color: var(--ink); background: var(--bg-sunken); }
+      .btn {
+        display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+        font-weight: 600; font-size: 15px; text-decoration: none; cursor: pointer;
+        border-radius: 8px; border: 1px solid transparent; min-height: 44px; padding: 10px 20px;
+        transition: background 0.15s ease, border-color 0.15s ease;
+        white-space: nowrap;
+      }
+      .btn-primary { background: var(--ink); color: var(--bg); }
+      .btn-primary:hover { background: var(--ink-2); }
+      .btn-accent { background: var(--accent); color: var(--accent-ink); }
+      .btn-accent:hover { filter: brightness(1.07); }
+      .btn-ghost { background: transparent; color: var(--ink); border-color: var(--line-strong); }
+      .btn-ghost:hover { border-color: var(--ink-3); }
+      .btn-sm { min-height: 38px; padding: 7px 14px; font-size: 14px; }
+      .nav .btn { margin-left: 8px; }
+
+      /* ---------- Hero ---------- */
+      .hero { padding: 72px 0 64px; border-bottom: 1px solid var(--line); }
+      .hero-grid { display: grid; grid-template-columns: 1.05fr 0.95fr; gap: 56px; align-items: center; }
+      .route-line {
+        display: inline-flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600;
+        color: var(--accent); background: var(--accent-soft); border: 1px solid var(--line);
+        padding: 5px 12px; border-radius: 999px; margin-bottom: 22px;
+      }
+      .route-line .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--accent); }
+      h1 { font-size: 44px; line-height: 1.12; letter-spacing: -0.025em; font-weight: 700; margin: 0 0 18px; }
+      h1 .thin { color: var(--ink-3); font-weight: 500; }
+      .lede { font-size: 18px; line-height: 1.6; color: var(--ink-2); margin: 0 0 30px; max-width: 34em; }
+      .hero-ctas { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+      .hero-note { margin-top: 16px; font-size: 13.5px; color: var(--ink-3); }
+      .hero-note strong { color: var(--ink-2); font-weight: 600; }
+
+      /* Preview card (dark panel in both modes — it mirrors the app) */
+      #preview { scroll-margin-top: 84px; }
+      .preview-shell { background: var(--dark-panel); border: 1px solid var(--dark-line); border-radius: 14px; padding: 10px; }
+      .preview {
+        background: var(--dark-panel-2); border: 1px solid var(--dark-line); border-radius: 8px;
+        color: var(--dark-ink); padding: 22px 22px 18px;
+      }
+      .preview-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; }
+      .preview-title { font-size: 13px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--dark-ink-2); }
+      .preview-tag { font-size: 11.5px; font-weight: 600; color: var(--amber); background: rgba(224,170,62,0.12); border: 1px solid rgba(224,170,62,0.35); padding: 3px 9px; border-radius: 999px; }
+      .leg { background: rgba(255,255,255,0.03); border: 1px solid var(--dark-line); border-radius: 8px; padding: 14px 16px; }
+      .leg + .leg { margin-top: 0; }
+      .leg-label { font-size: 12px; color: var(--dark-ink-2); font-weight: 500; margin-bottom: 6px; display: flex; justify-content: space-between; }
+      .leg-main { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+      .leg-amount { font-family: "IBM Plex Mono", monospace; font-size: 26px; font-weight: 600; letter-spacing: -0.01em; }
+      .leg-amount .unit { font-size: 14px; color: var(--dark-ink-2); font-weight: 500; }
+      .chain-chip { display: inline-flex; align-items: center; gap: 7px; font-size: 13.5px; font-weight: 600; white-space: nowrap; }
+      .chain-dot { width: 20px; height: 20px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; color: #fff; font-family: "IBM Plex Mono", monospace; }
+      .dot-base { background: #2f5fd0; }
+      .dot-arb { background: #7a4fd0; }
+      .connector { display: flex; align-items: center; gap: 10px; padding: 8px 16px; color: var(--dark-ink-2); font-size: 12.5px; }
+      .connector .rule { flex: 1; border-top: 1px dashed var(--dark-line); }
+      .quote-rows { margin: 16px 0 4px; border-top: 1px solid var(--dark-line); padding-top: 14px; display: grid; gap: 8px; }
+      .quote-rows .row { display: flex; justify-content: space-between; font-size: 13.5px; }
+      .quote-rows .k { color: var(--dark-ink-2); }
+      .quote-rows .v { font-family: "IBM Plex Mono", monospace; font-weight: 500; }
+      .quote-rows .v.good { color: var(--mint); }
+      .preview .btn { width: 100%; margin-top: 16px; background: var(--mint); color: #07130c; }
+      .preview .btn:hover { filter: brightness(1.08); }
+      .preview-foot { margin-top: 12px; font-size: 12px; color: var(--dark-ink-2); text-align: center; }
+      .preview-caption { margin-top: 14px; font-size: 13px; color: var(--ink-3); text-align: center; }
+      .preview-caption .mono { font-size: 12.5px; }
+
+      /* ---------- Fact strip ---------- */
+      .facts { border-bottom: 1px solid var(--line); background: var(--bg-sunken); }
+      .facts-grid { display: grid; grid-template-columns: repeat(4, 1fr); }
+      .fact { padding: 22px 24px; border-left: 1px solid var(--line); }
+      .fact:first-child { border-left: none; padding-left: 0; }
+      .fact .num { font-family: "IBM Plex Mono", monospace; font-size: 22px; font-weight: 600; letter-spacing: -0.01em; }
+      .fact .lbl { font-size: 13px; color: var(--ink-3); margin-top: 3px; line-height: 1.45; }
+
+      /* ---------- Sections ---------- */
+      section.block { padding: 72px 0; border-bottom: 1px solid var(--line); }
+      section.block:last-of-type { border-bottom: none; }
+      .sec-head { max-width: 640px; margin-bottom: 40px; }
+      .sec-head h2 { font-size: 30px; letter-spacing: -0.02em; line-height: 1.2; margin: 0 0 12px; font-weight: 700; }
+      .sec-head p { color: var(--ink-2); font-size: 16.5px; margin: 0; }
+
+      /* Benefits — editorial two-col list, not a card grid */
+      .benefits { display: grid; grid-template-columns: 1fr 1fr; gap: 0 56px; }
+      .benefit { padding: 22px 0; border-top: 1px solid var(--line); }
+      .benefit h3 { font-size: 17px; margin: 0 0 6px; font-weight: 600; display: flex; align-items: center; gap: 10px; }
+      .benefit h3 svg { color: var(--accent); flex: none; }
+      .benefit p { margin: 0; color: var(--ink-2); font-size: 15px; }
+
+      /* How it works — numbered steps */
+      .steps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 28px; counter-reset: step; }
+      .step { border-top: 2px solid var(--ink); padding-top: 16px; }
+      .step .n { font-family: "IBM Plex Mono", monospace; font-size: 13px; color: var(--accent); font-weight: 600; }
+      .step h3 { font-size: 16.5px; margin: 8px 0 6px; font-weight: 600; }
+      .step p { margin: 0; font-size: 14.5px; color: var(--ink-2); }
+
+      /* Networks */
+      .net-tools { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin-bottom: 20px; }
+      .net-search {
+        flex: 1 1 260px; display: flex; align-items: center; gap: 9px;
+        background: var(--bg-raised); border: 1px solid var(--line-strong); border-radius: 8px; padding: 0 14px;
+      }
+      .net-search svg { color: var(--ink-3); flex: none; }
+      .net-search input {
+        border: none; background: transparent; color: var(--ink); font: inherit; font-size: 15px;
+        height: 44px; width: 100%; outline: none;
+      }
+      .net-count { font-size: 13.5px; color: var(--ink-3); }
+      .net-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(168px, 1fr)); gap: 8px; }
+      .net {
+        display: flex; align-items: center; justify-content: space-between; gap: 8px;
+        background: var(--bg-raised); border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px;
+        font-size: 14px; font-weight: 500;
+      }
+      .net .id { font-family: "IBM Plex Mono", monospace; font-size: 11.5px; color: var(--ink-3); font-weight: 400; }
+      .net.live { border-color: var(--accent); background: var(--accent-soft); }
+      .net .live-badge { font-size: 10.5px; font-weight: 700; letter-spacing: 0.04em; color: var(--accent); text-transform: uppercase; }
+      .net-empty { display: none; padding: 28px; text-align: center; color: var(--ink-3); border: 1px dashed var(--line-strong); border-radius: 8px; font-size: 14.5px; }
+      .net-note { margin-top: 18px; font-size: 14px; color: var(--ink-2); background: var(--bg-sunken); border: 1px solid var(--line); border-radius: 8px; padding: 14px 16px; }
+      .net-note strong { color: var(--ink); }
+
+      /* Security — split with checklist */
+      .split { display: grid; grid-template-columns: 1fr 1fr; gap: 56px; align-items: start; }
+      .check-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 0; }
+      .check-list li { display: flex; gap: 12px; padding: 15px 0; border-top: 1px solid var(--line); font-size: 15px; }
+      .check-list li:first-child { border-top: none; padding-top: 2px; }
+      .check-list svg { color: var(--accent); flex: none; margin-top: 3px; }
+      .check-list strong { font-weight: 600; }
+      .check-list span { color: var(--ink-2); }
+      .sec-copy p { color: var(--ink-2); font-size: 16px; margin: 0 0 16px; }
+      .sec-copy h2 { font-size: 30px; letter-spacing: -0.02em; line-height: 1.2; margin: 0 0 16px; }
+
+      /* Final CTA */
+      .cta-band { background: var(--dark-panel); color: var(--dark-ink); border-radius: 14px; padding: 52px 48px; display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 40px; align-items: center; }
+      .cta-band h2 { font-size: 30px; letter-spacing: -0.02em; margin: 0 0 10px; line-height: 1.2; }
+      .cta-band p { color: var(--dark-ink-2); margin: 0; font-size: 16px; max-width: 36em; }
+      .cta-route { border: 1px solid var(--dark-line); border-radius: 8px; padding: 18px; font-size: 14px; }
+      .cta-route .row { display: flex; justify-content: space-between; padding: 5px 0; }
+      .cta-route .k { color: var(--dark-ink-2); }
+      .cta-route .v { font-family: "IBM Plex Mono", monospace; }
+      .cta-actions { margin-top: 22px; display: flex; gap: 12px; flex-wrap: wrap; }
+      .cta-band .btn-light { background: var(--dark-ink); color: var(--dark-panel); }
+      .cta-band .btn-light:hover { background: #ffffff; }
+      .cta-band .btn-outline { border-color: var(--dark-line); color: var(--dark-ink); background: transparent; }
+      .cta-band .btn-outline:hover { border-color: var(--dark-ink-2); }
+
+      /* Footer */
+      footer { border-top: 1px solid var(--line); padding: 44px 0 40px; }
+      .foot-grid { display: flex; gap: 40px; flex-wrap: wrap; justify-content: space-between; }
+      .foot-brand { max-width: 300px; }
+      .foot-brand p { color: var(--ink-3); font-size: 13.5px; margin: 10px 0 0; }
+      .foot-cols { display: flex; gap: 64px; flex-wrap: wrap; }
+      .foot-col h4 { font-size: 13px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-3); margin: 0 0 12px; font-weight: 600; }
+      .foot-col ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+      .foot-col a { color: var(--ink-2); text-decoration: none; font-size: 14.5px; padding: 4px 0; display: inline-block; min-height: 32px; }
+      .foot-col a:hover { color: var(--ink); }
+      .foot-base { margin-top: 36px; padding-top: 20px; border-top: 1px solid var(--line); display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; font-size: 13px; color: var(--ink-3); }
+
+      /* ---------- Responsive ---------- */
+      @media (max-width: 960px) {
+        .hero-grid { grid-template-columns: 1fr; gap: 44px; }
+        .steps { grid-template-columns: 1fr 1fr; }
+        .facts-grid { grid-template-columns: 1fr 1fr; }
+        .fact { padding: 18px 16px; }
+        .fact:nth-child(odd) { border-left: none; padding-left: 0; }
+        .cta-band { grid-template-columns: 1fr; padding: 40px 28px; }
+        .split { grid-template-columns: 1fr; gap: 32px; }
+      }
+      @media (max-width: 680px) {
+        nav.links { display: none; }
+        .brand .brand-sub { display: none; }
+        .hero { padding: 48px 0 44px; }
+        h1 { font-size: 34px; }
+        .lede { font-size: 16.5px; }
+        section.block { padding: 52px 0; }
+        .benefits { grid-template-columns: 1fr; }
+        .steps { grid-template-columns: 1fr; }
+        .sec-head h2, .sec-copy h2, .cta-band h2 { font-size: 25px; }
+        .leg-amount { font-size: 22px; }
+        .hero-ctas .btn { flex: 1 1 auto; }
+      }
+    </style>
+  </head>
+  <body>
+    <header class="nav">
+      <div class="wrap nav-inner">
+        <a class="brand" href="#top" aria-label="Relay Bridge — home">
+          <svg width="26" height="26" viewBox="0 0 26 26" fill="none" aria-hidden="true">
+            <rect x="1" y="1" width="24" height="24" rx="6" fill="var(--ink)"/>
+            <path d="M7 10.2h9.4M13.8 6.8 17.2 10.2 13.8 13.6" stroke="var(--bg)" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M19 15.8H9.6M12.2 12.4 8.8 15.8l3.4 3.4" stroke="var(--bg)" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" opacity="0.55"/>
+          </svg>
+          Relay&nbsp;Bridge
+          <span class="brand-sub">USDC, chain to chain</span>
+        </a>
+        <nav class="links" aria-label="Page sections">
+          <a href="#networks">Networks</a>
+          <a href="#how">How it works</a>
+          <a href="#security">Security</a>
+        </nav>
+        <a class="btn btn-primary btn-sm" href="#preview">See preview</a>
+      </div>
+    </header>
+
+    <main id="top">
+      <!-- ============ HERO ============ -->
+      <div class="hero">
+        <div class="wrap hero-grid">
+          <div>
+            <span class="route-line"><span class="dot"></span> Live route: USDC · Base → Arbitrum</span>
+            <h1>Bridge USDC from Base to Arbitrum, <span class="thin">without the runaround.</span></h1>
+            <p class="lede">
+              Relay Bridge is a focused little app with one job done properly: get a live Relay quote,
+              sign two steps in your own wallet, and watch the fill land on Arbitrum — with a receipt
+              saved for every run.
+            </p>
+            <div class="hero-ctas">
+              <a class="btn btn-accent" href="#preview">
+                See bridge preview
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M2.5 8h10M9 3.5 13.5 8 9 12.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </a>
+              <a class="btn btn-ghost" href="#how">How it works</a>
+            </div>
+            <p class="hero-note">
+              You’ll need <strong>1 USDC on Base</strong> plus a little <strong>ETH on Base</strong> for gas.
+              Nothing is signed or spent until you approve it in your wallet.
+            </p>
+          </div>
+
+          <div id="preview">
+            <div class="preview-shell">
+              <div class="preview" role="img" aria-label="Preview of the Relay Bridge app showing a verified quote: 1 USDC on Base becomes 0.977665 USDC on Arbitrum, with a fee of 0.022335 USDC.">
+                <div class="preview-head">
+                  <span class="preview-title">Bridge</span>
+                  <span class="preview-tag">Preview</span>
+                </div>
+                <div class="leg">
+                  <div class="leg-label"><span>You send</span><span>Base · 8453</span></div>
+                  <div class="leg-main">
+                    <span class="leg-amount">1.000000 <span class="unit">USDC</span></span>
+                    <span class="chain-chip"><span class="chain-dot dot-base">B</span> Base</span>
+                  </div>
+                </div>
+                <div class="connector" aria-hidden="true">
+                  <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M8 2v10M4 8.5 8 12.5 12 8.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                  <span>via Relay</span><span class="rule"></span><span>2 steps: approve, deposit</span>
+                </div>
+                <div class="leg">
+                  <div class="leg-label"><span>You receive</span><span>Arbitrum · 42161</span></div>
+                  <div class="leg-main">
+                    <span class="leg-amount">0.977665 <span class="unit">USDC</span></span>
+                    <span class="chain-chip"><span class="chain-dot dot-arb">A</span> Arbitrum</span>
+                  </div>
+                </div>
+                <div class="quote-rows">
+                  <div class="row"><span class="k">Relay fee</span><span class="v">0.022335 USDC</span></div>
+                  <div class="row"><span class="k">Rate</span><span class="v">1 USDC = 0.977665 USDC</span></div>
+                  <div class="row"><span class="k">Quote status</span><span class="v good">Verified live · 15 Nov 2026</span></div>
+                </div>
+                <a class="btn" href="#preview">See bridge preview</a>
+                <p class="preview-foot">Quotes refresh live in the app — this card shows the last verified quote.</p>
+              </div>
+            </div>
+            <p class="preview-caption">The real app, exactly as it runs — quote first, <span class="mono">0.977665</span> out on a 1 USDC bridge.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============ FACTS ============ -->
+      <div class="facts">
+        <div class="wrap facts-grid">
+          <div class="fact">
+            <div class="num">58</div>
+            <div class="lbl">Chains on the Relay network behind the app, checked against Relay’s public chains API on 15 Nov 2026</div>
+          </div>
+          <div class="fact">
+            <div class="num">0.022335</div>
+            <div class="lbl">USDC total fee on the verified 1 USDC quote — shown in full before you sign anything</div>
+          </div>
+          <div class="fact">
+            <div class="num">2 steps</div>
+            <div class="lbl">Approve USDC, then deposit. Each one signed by you, in your own wallet</div>
+          </div>
+          <div class="fact">
+            <div class="num">1 receipt</div>
+            <div class="lbl">Saved for every bridge, with Base and Arbitrum explorer links to prove the fill</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============ BENEFITS ============ -->
+      <section class="block" id="benefits">
+        <div class="wrap">
+          <div class="sec-head">
+            <h2>Built for people who bridge on purpose</h2>
+            <p>No dashboards of noise, no mystery fees. Relay Bridge keeps the four things that matter in plain sight.</p>
+          </div>
+          <div class="benefits">
+            <div class="benefit">
+              <h3>
+                <svg width="18" height="18" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M11 1.8 4.2 11h4.5L7.6 18.2 14.6 9H10L11 1.8Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+                A real quote, not an estimate
+              </h3>
+              <p>Every quote comes straight from Relay’s API for your exact route — output amount, fee and steps — before your wallet is even asked to sign.</p>
+            </div>
+            <div class="benefit">
+              <h3>
+                <svg width="18" height="18" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M3 5.5h14M3 10h14M3 14.5h8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+                The fee, up front
+              </h3>
+              <p>On the verified quote, bridging 1 USDC costs 0.022335 USDC and lands 0.977665 USDC on Arbitrum. That breakdown is on screen before step one — never buried after the fact.</p>
+            </div>
+            <div class="benefit">
+              <h3>
+                <svg width="18" height="18" viewBox="0 0 20 20" fill="none" aria-hidden="true"><circle cx="10" cy="10" r="7.5" stroke="currentColor" stroke-width="1.6"/><path d="M10 5.8V10l3 2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+                Tracked until it lands
+              </h3>
+              <p>The app polls Relay’s status endpoint after you deposit and follows the fill through waiting and pending to success — or refund — instead of leaving you to refresh an explorer.</p>
+            </div>
+            <div class="benefit">
+              <h3>
+                <svg width="18" height="18" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 2.8h8L16.5 6v11.2H5z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M12.8 2.8V6h3.7M7.8 10h4.4M7.8 13.2h4.4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                A receipt you can point to
+              </h3>
+              <p>Each completed bridge is saved with its amounts and links to both explorers — the deposit on Base and the fill on Arbitrum — so any run can be verified on-chain in one click.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ HOW IT WORKS ============ -->
+      <section class="block" id="how">
+        <div class="wrap">
+          <div class="sec-head">
+            <h2>How it works</h2>
+            <p>Four steps, start to receipt. The app handles the Relay calls; your wallet handles the signatures.</p>
+          </div>
+          <div class="steps">
+            <div class="step">
+              <span class="n">01</span>
+              <h3>Connect your wallet</h3>
+              <p>MetaMask, Coinbase Wallet or Rabby — any wallet holding USDC and a little ETH on Base. No account, no sign-up.</p>
+            </div>
+            <div class="step">
+              <span class="n">02</span>
+              <h3>Get the live quote</h3>
+              <p>The app asks Relay for 1 USDC, Base → Arbitrum, and shows the output, the 0.022335 USDC fee and the exact steps before anything moves.</p>
+            </div>
+            <div class="step">
+              <span class="n">03</span>
+              <h3>Approve, then deposit</h3>
+              <p>Two wallet signatures: approve USDC, then make the deposit. Nothing executes without both, and you can stop after either one.</p>
+            </div>
+            <div class="step">
+              <span class="n">04</span>
+              <h3>Track it to success</h3>
+              <p>Status updates live until Relay confirms the fill on Arbitrum. The receipt — amounts plus both explorer links — is saved to your history.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ NETWORKS ============ -->
+      <section class="block" id="networks">
+        <div class="wrap">
+          <div class="sec-head">
+            <h2>Powered by Relay’s network</h2>
+            <p>
+              Relay Bridge runs on Relay, so its reach is Relay’s reach: 58 chains, from Ethereum and Solana
+              to Bitcoin and TON. The app’s live route today is USDC from Base to Arbitrum — the two chains
+              marked below.
+            </p>
+          </div>
+          <div class="net-tools">
+            <label class="net-search">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><circle cx="7" cy="7" r="4.5" stroke="currentColor" stroke-width="1.6"/><path d="m10.5 10.5 3 3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+              <input id="netFilter" type="search" placeholder="Search 58 chains — try “base” or “solana”" aria-label="Search supported chains" />
+            </label>
+            <span class="net-count" id="netCount" role="status"></span>
+          </div>
+          <div class="net-grid" id="netGrid"></div>
+          <p class="net-empty" id="netEmpty">No chain matches that search. The full Relay network is 58 chains — clear the search to see them all.</p>
+          <p class="net-note">
+            <strong>Reading this list honestly:</strong> these 58 chains are the Relay network the app is built on,
+            verified from Relay’s public chains API on 15 Nov 2026. The route that works in the app right now is
+            <strong>USDC · Base → Arbitrum</strong>. Other routes become available as the app grows into the network —
+            the page won’t pretend otherwise.
+          </p>
+        </div>
+      </section>
+
+      <!-- ============ SECURITY ============ -->
+      <section class="block" id="security">
+        <div class="wrap split">
+          <div class="sec-copy">
+            <h2>Your keys stay yours. So does the API key.</h2>
+            <p>
+              Relay Bridge is non-custodial by construction: it never holds your funds or your keys.
+              Funds move wallet → Relay → your wallet on Arbitrum, and every movement is a transaction
+              you personally signed.
+            </p>
+            <p>
+              The same discipline applies on our side of the integration. The Relay API key lives on the
+              server only — it is never shipped to the browser, never in the page code, and the app only
+              ever displays its last four characters.
+            </p>
+            <a class="btn btn-ghost" href="#preview">See bridge preview</a>
+          </div>
+          <ul class="check-list">
+            <li>
+              <svg width="18" height="18" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="m3.5 10.5 4.2 4.2L16.5 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              <div><strong>You sign everything.</strong> <span>Approve and deposit are separate signatures in your own wallet — the app cannot move funds on its own.</span></div>
+            </li>
+            <li>
+              <svg width="18" height="18" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="m3.5 10.5 4.2 4.2L16.5 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              <div><strong>Key stays server-side.</strong> <span>The browser talks to the app’s own quote endpoint; the Relay API key is added on the server and never exposed to the frontend.</span></div>
+            </li>
+            <li>
+              <svg width="18" height="18" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="m3.5 10.5 4.2 4.2L16.5 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              <div><strong>Status from the source.</strong> <span>Fill status is polled from Relay until it resolves to success or refund — no guessed states, no silent failures.</span></div>
+            </li>
+            <li>
+              <svg width="18" height="18" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="m3.5 10.5 4.2 4.2L16.5 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              <div><strong>Proof on-chain.</strong> <span>Every receipt links to the deposit on Basescan and the fill on Arbiscan, so the result never has to be taken on trust.</span></div>
+            </li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- ============ FINAL CTA ============ -->
+      <section class="block">
+        <div class="wrap">
+          <div class="cta-band">
+            <div>
+              <h2>Your next bridge is already quoted.</h2>
+              <p>Open the app, connect a wallet with 1 USDC on Base, and run the route this page is built around. Quote first — you only sign when the numbers look right.</p>
+              <div class="cta-actions">
+                <a class="btn btn-light" href="#preview">See bridge preview</a>
+                <a class="btn btn-outline" href="#networks">Browse the 58 chains</a>
+              </div>
+            </div>
+            <div class="cta-route" aria-label="Featured route summary">
+              <div class="row"><span class="k">Route</span><span class="v">Base → Arbitrum</span></div>
+              <div class="row"><span class="k">Token</span><span class="v">USDC → USDC</span></div>
+              <div class="row"><span class="k">You send</span><span class="v">1.000000 USDC</span></div>
+              <div class="row"><span class="k">You receive</span><span class="v">0.977665 USDC</span></div>
+              <div class="row"><span class="k">Fee</span><span class="v">0.022335 USDC</span></div>
+              <div class="row"><span class="k">Chain IDs</span><span class="v">8453 → 42161</span></div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <div class="wrap">
+        <div class="foot-grid">
+          <div class="foot-brand">
+            <a class="brand" href="#top" aria-label="Relay Bridge — back to top">
+              <svg width="24" height="24" viewBox="0 0 26 26" fill="none" aria-hidden="true">
+                <rect x="1" y="1" width="24" height="24" rx="6" fill="var(--ink)"/>
+                <path d="M7 10.2h9.4M13.8 6.8 17.2 10.2 13.8 13.6" stroke="var(--bg)" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M19 15.8H9.6M12.2 12.4 8.8 15.8l3.4 3.4" stroke="var(--bg)" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" opacity="0.55"/>
+              </svg>
+              Relay&nbsp;Bridge
+            </a>
+            <p>A small bridge app with a proper finish: live Relay quotes, wallet-signed steps, tracked fills and saved receipts.</p>
+          </div>
+          <div class="foot-cols">
+            <div class="foot-col">
+              <h4>Product</h4>
+              <ul>
+                <li><a href="#preview">See bridge preview</a></li>
+                <li><a href="#how">How it works</a></li>
+                <li><a href="#networks">Supported networks</a></li>
+                <li><a href="#security">Security</a></li>
+              </ul>
+            </div>
+            <div class="foot-col">
+              <h4>Relay</h4>
+              <ul>
+                <li><a href="https://relay.link/bridge" target="_blank" rel="noopener">Relay bridge</a></li>
+                <li><a href="https://docs.relay.link/references/api/quickstart" target="_blank" rel="noopener">Relay API quickstart</a></li>
+                <li><a href="https://dashboard.relay.link" target="_blank" rel="noopener">Relay builder dashboard</a></li>
+              </ul>
+            </div>
+            <div class="foot-col">
+              <h4>Explorers</h4>
+              <ul>
+                <li><a href="https://basescan.org" target="_blank" rel="noopener">Basescan</a></li>
+                <li><a href="https://arbiscan.io" target="_blank" rel="noopener">Arbiscan</a></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        <div class="foot-base">
+          <span>Relay Bridge — built on the Relay protocol. Quotes shown were verified live on 15 Nov 2026 and refresh in the app.</span>
+          <span class="mono">Base 8453 → Arbitrum 42161 · USDC</span>
+        </div>
+      </div>
+    </footer>
+
+    <script>
+      // Chain list verified from Relay's public chains API (api.relay.link/chains), 15 Nov 2026.
+      var CHAINS = [
+        ["Ethereum", 1], ["Optimism", 10], ["Cronos", 25], ["BNB", 56], ["Gnosis", 100],
+        ["Unichain", 130], ["Polygon", 137], ["Monad", 143], ["Sonic", 146], ["Manta Pacific", 169],
+        ["X Layer", 196], ["Boba Network", 288], ["zkSync Era", 324], ["Shape", 360], ["World Chain", 480],
+        ["Flow EVM", 747], ["Stable", 988], ["HyperEVM", 999], ["Metis", 1088], ["Hyperliquid", 1337],
+        ["Soneium", 1868], ["Ronin", 2020], ["Abstract", 2741], ["Morph", 2818], ["Tempo", 4217],
+        ["MegaETH", 4326], ["Robinhood Chain", 4663], ["Mantle", 5000], ["Somnia", 5031], ["Arc", 5042],
+        ["Base", 8453], ["Plasma", 9745], ["ApeChain", 33139], ["Mode", 34443], ["Mythos", 42018],
+        ["Arbitrum", 42161], ["Celo", 42220], ["Avalanche", 43114], ["Zircuit", 48900], ["Ink", 57073],
+        ["Linea", 59144], ["BOB", 60808], ["Berachain", 80094], ["Doma", 97477], ["Plume", 98866],
+        ["Elysium", 99901], ["Scroll", 534352], ["XRP", 537724], ["Gensyn", 685689], ["Katana", 747474],
+        ["Lighter", 3586256], ["Zora", 7777777], ["Bitcoin", 8253038], ["Eclipse", 9286185],
+        ["TON", 224235520], ["Robinhood Lighter", 548123634], ["Tron", 728126428], ["Solana", 792703809]
+      ];
+      var LIVE = { "Base": true, "Arbitrum": true };
+      var grid = document.getElementById("netGrid");
+      var empty = document.getElementById("netEmpty");
+      var count = document.getElementById("netCount");
+      var input = document.getElementById("netFilter");
+
+      function render(filter) {
+        var q = (filter || "").trim().toLowerCase();
+        var shown = 0;
+        var html = "";
+        for (var i = 0; i < CHAINS.length; i++) {
+          var name = CHAINS[i][0], id = CHAINS[i][1];
+          if (q && name.toLowerCase().indexOf(q) === -1 && String(id).indexOf(q) === -1) continue;
+          shown++;
+          var live = LIVE[name];
+          html += '<div class="net' + (live ? " live" : "") + '"><span>' + name + "</span>" +
+            (live ? '<span class="live-badge">Live route</span>' : '<span class="id">' + id + "</span>") +
+            "</div>";
+        }
+        grid.innerHTML = html;
+        empty.style.display = shown === 0 ? "block" : "none";
+        count.textContent = q
+          ? shown + " of 58 chains match"
+          : "58 chains · chain IDs from the Relay API";
+      }
+      input.addEventListener("input", function () { render(input.value); });
+      render("");
+    </script>
+  </body>
+</html>
